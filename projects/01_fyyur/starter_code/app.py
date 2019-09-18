@@ -46,7 +46,7 @@ class Venue(db.Model):
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
-    # genre = db.Column(db.Array(db.String(120)))
+    genre = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
@@ -473,15 +473,29 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+    data = Artist()
     # called upon submitting the new artist listing form
     # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
+    try:
+        data.name = request.form['name']
+        data.city = request.form['city']
+        data.state = request.form['state']
+        data.phone = request.form['phone']
+        data.genres = request.form['genres']
+        data.facebook_link = request.form['facebook_link']
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-    return render_template('pages/home.html')
+        db.session.add(data)
+        db.session.commit()
+    except: 
+        db.session.rollback()
+        # TODO: on unsuccessful db insert, flash an error instead.
+        flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    finally:
+        # on successful db insert, flash success
+        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+        return render_template('pages/home.html')
+
+    # TODO: modify data to be the data object returned from db insertion
 
 
 #  Shows
