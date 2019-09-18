@@ -264,6 +264,7 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
     data = Venue()
+    error = False
     try:
         # TODO: insert form data as a new Venue record in the db, instead
         # print(request.form['genres'])
@@ -279,6 +280,7 @@ def create_venue_submission():
         db.session.commit()
         # TODO: modify data to be the data object returned from db insertion
     except:
+        error = True
         db.session.rollback()
         # TODO: on unsuccessful db insert, flash an error instead.
         # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
@@ -287,7 +289,7 @@ def create_venue_submission():
 
     finally:
         # on successful db insert, flash success
-        flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        if error == False: flash('Venue ' + request.form['name'] + ' was successfully listed!')
         # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
 
@@ -484,6 +486,7 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
     data = Artist()
+    error = False
     # called upon submitting the new artist listing form
     # TODO: insert form data as a new Venue record in the db, instead
     try:
@@ -497,12 +500,13 @@ def create_artist_submission():
         db.session.add(data)
         db.session.commit()
     except: 
+        error = True
         db.session.rollback()
         # TODO: on unsuccessful db insert, flash an error instead.
         flash('An error occurred. Artist ' + data.name + ' could not be listed.')
     finally:
         # on successful db insert, flash success
-        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+        if error == False: flash('Artist ' + request.form['name'] + ' was successfully listed!')
     return render_template('pages/home.html')
 
     # TODO: modify data to be the data object returned from db insertion
