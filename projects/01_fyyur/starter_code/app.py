@@ -503,7 +503,7 @@ def create_artist_submission():
     finally:
         # on successful db insert, flash success
         flash('Artist ' + request.form['name'] + ' was successfully listed!')
-        return render_template('pages/home.html')
+    return render_template('pages/home.html')
 
     # TODO: modify data to be the data object returned from db insertion
 
@@ -565,12 +565,24 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
+    data = Show()
+    error = False
     # TODO: insert form data as a new Show record in the db, instead
+    try:
+        data.start_time = request.form['start_time']
+        data.artist_id = request.form['artist_id']
+        data.venue_id = request.form['venue_id']
 
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
+        db.session.add(data)
+        db.session.commit()
+    except:
+        # TODO: on unsuccessful db insert, flash an error instead.
+        error = True
+        flash('An error occurred. This show could not be listed.')
+    finally:
+        # on successful db insert, flash success
+        if error == False: flash('Show was successfully listed!')
+    
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
 
