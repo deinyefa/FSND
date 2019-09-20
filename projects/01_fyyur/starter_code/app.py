@@ -116,7 +116,7 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    venues = Venue.query.all()
+    venues = Venue.query.order_by('id').all()
     data = []
 
     # num_upcoming_shows  --->  TODO: add this later,
@@ -304,7 +304,7 @@ def delete_venue(venue_id):
 def artists():
     # TODO: replace with real data returned from querying the database
     data = []
-    artists = Artist.query.all()
+    artists = Artist.query.order_by('id').all()
     for artist in artists:
         data.append({
             'id': artist.id,
@@ -333,7 +333,21 @@ def search_artists():
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
-    # data = []
+    active_artist = Artist.query.get(artist_id)
+    print(active_artist)
+    data = {
+        "id": active_artist.id,
+        "name": active_artist.name,
+        "genres": [active_artist.genres],
+        "city": active_artist.city,
+        "state": active_artist.state,
+        "phone": active_artist.phone,
+        "website": active_artist.website,
+        "facebook_link": active_artist.facebook_link,
+        "seeking_venue": active_artist.seeking_venue,
+        "seeking_description": active_artist.seeking_description,
+        "image_link": active_artist.image_link,
+    }
     data1 = {
         "id": 1,
         "name": "Guns N Petals",
@@ -355,55 +369,6 @@ def show_artist(artist_id):
         "upcoming_shows": [],
         "past_shows_count": 1,
         "upcoming_shows_count": 0,
-    }
-    data2 = {
-        "id": 5,
-        "name": "Matt Quevedo",
-        "genres": ["Jazz"],
-        "city": "New York",
-        "state": "NY",
-        "phone": "300-400-5000",
-        "facebook_link": "https://www.facebook.com/mattquevedo923251523",
-        "seeking_venue": False,
-        "image_link": "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
-        "past_shows": [{
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2019-06-15T23:00:00.000Z"
-        }],
-        "upcoming_shows": [],
-        "past_shows_count": 1,
-        "upcoming_shows_count": 0,
-    }
-    data3 = {
-        "id": 6,
-        "name": "The Wild Sax Band",
-        "genres": ["Jazz", "Classical"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "432-325-5432",
-        "seeking_venue": False,
-        "image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "past_shows": [],
-        "upcoming_shows": [{
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2035-04-01T20:00:00.000Z"
-        }, {
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2035-04-08T20:00:00.000Z"
-        }, {
-            "venue_id": 3,
-            "venue_name": "Park Square Live Music & Coffee",
-            "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
-            "start_time": "2035-04-15T20:00:00.000Z"
-        }],
-        "past_shows_count": 0,
-        "upcoming_shows_count": 3,
     }
     # data = list(filter(lambda d: d['id'] ==
     #                    artist_id, [data1, data2, data3]))[0]
@@ -513,7 +478,7 @@ def shows():
     # displays list of shows at /shows
     # TODO: replace with real venues data.
     data = []
-    shows = Show.query.all()
+    shows = Show.query.order_by('id').all()
     for show in shows:
         artist_image_link = "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
         
