@@ -48,11 +48,12 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500))
     genre = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
+    seeking_talent = db.Column(db.Boolean, default=False, nullable=False)
+    seeking_description = db.Column(db.String(120))
+    image_link = db.Column(db.String())
     shows = db.relationship('Show', backref='venue', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    def __repr__(self):
-        return f'<Venue {self.id}, {self.city} , {self.state}>'
 
 
 class Artist(db.Model):
@@ -334,7 +335,9 @@ def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
     active_artist = Artist.query.get(artist_id)
-    print(active_artist)
+    past_shows = []
+    upcoming_shows = []
+    
     data = {
         "id": active_artist.id,
         "name": active_artist.name,
@@ -347,7 +350,12 @@ def show_artist(artist_id):
         "seeking_venue": active_artist.seeking_venue,
         "seeking_description": active_artist.seeking_description,
         "image_link": active_artist.image_link,
+        "past_shows": past_shows,
+        "upcoming_shows": upcoming_shows,
+        "past_shows_count": len(past_shows),
+        "upcoming_shows_count": len(upcoming_shows)
     }
+
     data1 = {
         "id": 1,
         "name": "Guns N Petals",
