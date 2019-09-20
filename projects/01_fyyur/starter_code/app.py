@@ -66,6 +66,9 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    seeking_venue =  db.Column(db.Boolean, default=False, nullable=False)
+    seeking_description = db.Column(db.String(120))
     shows = db.relationship('Show', backref='artist', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
@@ -136,14 +139,6 @@ def venues():
     #         "id": 3,
     #         "name": "Park Square Live Music & Coffee",
     #         "num_upcoming_shows": 1,
-    #     }]
-    # }, {
-    #     "city": "New York",
-    #     "state": "NY",
-    #     "venues": [{
-    #         "id": 2,
-    #         "name": "The Dueling Pianos Bar",
-    #         "num_upcoming_shows": 0,
     #     }]
     # }]
     return render_template('pages/venues.html', areas=data)
@@ -308,16 +303,13 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
     # TODO: replace with real data returned from querying the database
-    data = [{
-        "id": 4,
-        "name": "Guns N Petals",
-    }, {
-        "id": 5,
-        "name": "Matt Quevedo",
-    }, {
-        "id": 6,
-        "name": "The Wild Sax Band",
-    }]
+    data = []
+    artists = Artist.query.all()
+    for artist in artists:
+        data.append({
+            'id': artist.id,
+            'name': artist.name
+        })
     return render_template('pages/artists.html', artists=data)
 
 
@@ -341,8 +333,9 @@ def search_artists():
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
+    # data = []
     data1 = {
-        "id": 4,
+        "id": 1,
         "name": "Guns N Petals",
         "genres": ["Rock n Roll"],
         "city": "San Francisco",
@@ -412,8 +405,8 @@ def show_artist(artist_id):
         "past_shows_count": 0,
         "upcoming_shows_count": 3,
     }
-    data = list(filter(lambda d: d['id'] ==
-                       artist_id, [data1, data2, data3]))[0]
+    # data = list(filter(lambda d: d['id'] ==
+    #                    artist_id, [data1, data2, data3]))[0]
     return render_template('pages/show_artist.html', artist=data)
 
 #  Update
