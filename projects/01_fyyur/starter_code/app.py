@@ -7,102 +7,20 @@ import logging
 from logging import FileHandler, Formatter
 from itertools import groupby
 
-import babel
-import dateutil.parser
+# import babel
+# import dateutil.parser
 import datetime
-from flask import (Flask, Response, flash, redirect, render_template, request,
+from flask import (Response, flash, redirect, render_template, request,
                    url_for)
-from flask_migrate import Migrate
-from flask_moment import Moment
+# from flask_migrate import Migrate
+# from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import Form
 
 from forms import *
 
-#----------------------------------------------------------------------------#
-# App Config.
-#----------------------------------------------------------------------------#
+from models import (Venue, Artist, Show, format_datetime, app)
 
-app = Flask(__name__)
-moment = Moment(app)
-app.config.from_object('config')
-db = SQLAlchemy(app)
-
-# TODO: connect to a local postgresql database
-app.config.from_object('config.SQLALCHEMY_DATABASE_URI')
-
-migrate = Migrate(app, db)
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    genres = db.Column(db.String(120))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean, default=False, nullable=False)
-    seeking_description = db.Column(db.String(120))
-    image_link = db.Column(db.String())
-    shows = db.relationship('Show', backref='venue', lazy=True)
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean, default=False, nullable=False)
-    seeking_description = db.Column(db.String(120))
-    shows = db.relationship('Show', backref='artist', lazy=True)
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
-
-class Show(db.Model):
-    __tablename__ = 'Show'
-
-    id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey(
-        'Artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-    start_time = db.Column(db.DateTime)
-
-#----------------------------------------------------------------------------#
-# Filters.
-#----------------------------------------------------------------------------#
-
-
-def format_datetime(value, format='medium'):
-    date = dateutil.parser.parse(value)
-    if format == 'full':
-        format = "EEEE MMMM, d, y 'at' h:mma"
-    elif format == 'medium':
-        format = "EE MM, dd, y h:mma"
-    return babel.dates.format_datetime(date, format)
-
-
-app.jinja_env.filters['datetime'] = format_datetime
 
 #----------------------------------------------------------------------------#
 # Controllers.
@@ -124,28 +42,15 @@ def venues():
     venues = Venue.query.order_by('id').all()
     data = []
 
-    # num_upcoming_shows  --->  TODO: add this later,
-
-    for key, venue in groupby(sorted(venues, key=lambda v: [v.city, v.state]), key=lambda v: [v.city, v.state]):
+    for key, venues in groupby(sorted(venues, key=lambda v: [v.city, v.state]), key=lambda v: [v.city, v.state]):
+        
         data.append({
             'city': key[0],
             'state': key[1],
-            'venues': list(venue)
+            'venues': [{'id': venue.id, 'name': venue.name, 'num': len(venue.shows)} for venue in list(venues)]
         })
+        print((data))
 
-    # data = [{
-    #     "city": "San Francisco",
-    #     "state": "CA",
-    #     "venues": [{
-    #         "id": 1,
-    #         "name": "The Musical Hop",
-    #         "num_upcoming_shows": 0,
-    #     }, {
-    #         "id": 3,
-    #         "name": "Park Square Live Music & Coffee",
-    #         "num_upcoming_shows": 1,
-    #     }]
-    # }]
     return render_template('pages/venues.html', areas=data)
 
 
@@ -552,14 +457,13 @@ def shows():
     data = []
     shows = Show.query.order_by('id').all()
     for show in shows:
-        artist_image_link = "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
 
         data.append({
             "venue_id": show.venue_id,
             "venue_name": show.venue.name,
             "artist_id": show.artist_id,
             "artist_name": show.artist.name,
-            "artist_image_link": artist_image_link,
+            "artist_image_link": show.artist.image_link,
             "start_time": str(show.start_time)
         })
 
