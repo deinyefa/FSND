@@ -383,19 +383,22 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
     form = ArtistForm()
+    
+    active_artist = Artist.query.get(artist_id)
+    
+    form.name.default = active_artist.name
+    form.city.default = active_artist.city
+    form.state.default = active_artist.state
+    form.phone.default = active_artist.phone
+    form.genres.default = active_artist.genres.split(',')
+    form.facebook_link.default = active_artist.facebook_link
+    
     artist = {
-        "id": 4,
-        "name": "Guns N Petals",
-        "genres": ["Rock n Roll"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
-        "facebook_link": "https://www.facebook.com/GunsNPetals",
-        "seeking_venue": True,
-        "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+        "id": active_artist.id,
+        "name": active_artist.name
     }
+
+    form.process()
     # TODO: populate form with fields from artist with ID <artist_id>
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -404,6 +407,28 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
+    error = False
+    active_artist = Artist.query.get(artist_id)
+    
+    try:
+        active_artist.name = request.form['name']
+        active_artist.city = request.form['city']
+        active_artist.state = request.form['state']
+        active_artist.phone = request.form['phone']
+        active_artist.genres = ','.join(request.form.getlist('genres'))
+        active_artist.facebook_link = request.form['facebook_link']
+
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        
+        flash('An error occurred. Artist ' +
+              active_artist.name + ' could not be listed.')
+    finally:
+        if error == False:
+            flash('Artist ' + request.form['name'] +
+                  ' was successfully updated!')
 
     return redirect(url_for('show_artist', artist_id=artist_id))
 
