@@ -212,7 +212,7 @@ def show_venue(venue_id):
     data = {
         "id": venue_id,
         "name": active_venue.name,
-        "genres": [active_venue.genres],
+        "genres": active_venue.genres.split(','),
         "address": active_venue.address,
         "city": active_venue.city,
         "state": active_venue.state,
@@ -246,13 +246,12 @@ def create_venue_submission():
     error = False
     try:
         # TODO: insert form data as a new Venue record in the db, instead
-        # print(request.form['genres'])
         data.name = request.form['name']
         data.city = request.form['city']
         data.state = request.form['state']
         data.address = request.form['address']
         data.phone = request.form['phone']
-        data.genres = request.form['genres']
+        data.genres = ','.join(request.form.getlist('genres'))
         data.facebook_link = request.form['facebook_link']
 
         db.session.add(data)
