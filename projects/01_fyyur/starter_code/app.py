@@ -173,7 +173,7 @@ def search_venues():
         "count": len(search_query),
         "data": resultsData
     }
-    
+
     return render_template('pages/search_venues.html', results=response, search_term=search_term)
 
 
@@ -362,7 +362,7 @@ def show_artist(artist_id):
     data = {
         "id": active_artist.id,
         "name": active_artist.name,
-        "genres": [active_artist.genres],
+        "genres": active_artist.genres.split(','),
         "city": active_artist.city,
         "state": active_artist.state,
         "phone": active_artist.phone,
@@ -457,7 +457,7 @@ def create_artist_submission():
         data.city = request.form['city']
         data.state = request.form['state']
         data.phone = request.form['phone']
-        data.genres = request.form['genres']
+        data.genres = ','.join(request.form.getlist('genres'))
         data.facebook_link = request.form['facebook_link']
 
         db.session.add(data)
