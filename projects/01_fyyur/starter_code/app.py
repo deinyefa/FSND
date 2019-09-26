@@ -240,7 +240,7 @@ def create_venue_submission():
         data.state = request.form['state']
         data.address = request.form['address']
         data.phone = request.form['phone']
-        data.genre = request.form['genres']
+        data.genres = request.form['genres']
         data.facebook_link = request.form['facebook_link']
 
         db.session.add(data)
@@ -292,15 +292,27 @@ def search_artists():
     # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
-    response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+   
+    search_term = request.form.get('search_term', '')
+    search_query = Artist.query.filter(Artist.name.ilike('%' + search_term + '%')).all()
+   
+    resultsData = []
+
+    artist_shows = Artist.query.join('shows').all()
+
+    for search in search_query:
+        resultsData.append({
+            "id": search.id,
+            "name": search.name,
+            "num_upcoming_shows": len(artist_shows)
+        })
+
+    response  = {
+        "count": len(search_query),
+        "data": resultsData
     }
-    return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+
+    return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 
 @app.route('/artists/<int:artist_id>')
@@ -475,14 +487,6 @@ def shows():
             "start_time": str(show.start_time)
         })
 
-    # data = [{
-    #     "venue_id": 1,
-    #     "venue_name": "The Musical Hop",
-    #     "artist_id": 4,
-    #     "artist_name": "Guns N Petals",
-    #     "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-    #     "start_time": "2019-05-21T21:30:00.000Z"
-    # }]
     return render_template('pages/shows.html', shows=data)
 
 
