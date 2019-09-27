@@ -19,7 +19,7 @@ from flask_wtf import Form
 
 from forms import *
 
-from models import (Venue, Artist, Show, format_datetime, app)
+from models import (Venue, Artist, Show, format_datetime, app, db)
 
 
 #----------------------------------------------------------------------------#
