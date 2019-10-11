@@ -97,18 +97,23 @@ def create_app(test_config=None):
   '''
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
-      question = Question.query.filter(Question.id == question_id).one_or_none()
+      try:
+        question = Question.query.filter(Question.id == question_id).one_or_none()
 
-      if question is None:
-        abort(404)
-      else:
+        if question is None:
+          abort(404)
+
         question.delete()
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection)
 
         return jsonify({
           'success': True,
           'id': question_id,
           'message': 'Question was successfully deleted'
         })
+      except:
+        abort(422)
 
 
     '''
@@ -165,6 +170,14 @@ def create_app(test_config=None):
             "success": False,
             "error": 404,
             "message": "resource not found"
-        })
+        }), 404
+
+    @app.errorhandler(422)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
 
     return app
