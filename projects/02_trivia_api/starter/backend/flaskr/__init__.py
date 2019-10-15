@@ -136,35 +136,7 @@ def create_app(test_config=None):
   TEST: When you submit a question on the "Add" tab,
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.
-  '''
-    @app.route('/questions', methods=['POST'])
-    def create_question():
-        body = request.get_json()
-
-        new_question = body.get('question', None)
-        new_answer = body.get('answer', None)
-        new_difficulty = body.get('difficulty', None)
-        new_category = body.get('category', None)
-
-        try:
-            question = Question(question=new_question, answer=new_answer,
-                                difficulty=new_difficulty, category=new_category)
-            question.insert()
-
-            selection = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, selection)
-
-            return jsonify({
-                'success': True,
-                'created': question.id,
-                'questions': current_questions,
-                'total_questions': len(Question.query.all())
-            })
-
-        except:
-            abort(422)
-
-    '''
+  
   @TODO:
   Create a POST endpoint to get questions based on a search term.
   It should return any questions for whom the search term
@@ -174,24 +146,45 @@ def create_app(test_config=None):
   only question that include that string within their question.
   Try using the word "title" to start.
   '''
-    # @app.route('/questions', methods=['POST'])
-    # def find_questions():
-    #     try:
-    #         search_term = request.args.get('searchTerm', '')
-    #         print(search_term)
-    #         query = Question.query.filter(
-    #             Question.question.ilike('%' + search_term + '%')).all()
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        body = request.get_json()
 
-    #         current_questions = paginate_questions(request, query)
+        new_question = body.get('question', None)
+        new_answer = body.get('answer', None)
+        new_difficulty = body.get('difficulty', None)
+        new_category = body.get('category', None)
+        search_query = body.get('searchTerm', None)
 
-    #         return jsonify({
-    #             'success': True,
-    #             'questions': current_questions,
-    #             'total_questions': len(current_questions),
-    #             'current_category': {}
-    #         })
-    #     except:
-    #         abort(422)
+        try:
+            if search_query:
+                query = Question.query.filter(
+                    Question.question.ilike('%' + search_query + '%')).all()
+
+                current_questions = paginate_questions(request, query)
+
+                return jsonify({
+                    'success': True,
+                    'questions': current_questions,
+                    'total_questions': len(current_questions),
+                    'current_category': {}
+                })
+            else:
+                question = Question(question=new_question, answer=new_answer,
+                                    difficulty=new_difficulty, category=new_category)
+                question.insert()
+
+                selection = Question.query.order_by(Question.id).all()
+                current_questions = paginate_questions(request, selection)
+
+                return jsonify({
+                    'success': True,
+                    'created': question.id,
+                    'questions': current_questions,
+                    'total_questions': len(Question.query.all())
+                })
+        except:
+            abort(422)
 
     '''
   @TODO:
@@ -209,15 +202,15 @@ def create_app(test_config=None):
 
             if questions is None:
                 abort(404)
+            else:
+                current_questions = paginate_questions(request, questions)
 
-            current_questions = paginate_questions(request, questions)
-
-            return jsonify({
-                'success': True,
-                'message': 'Displaying questions based on the specified category',
-                'questions': current_questions,
-                'current_category': category_id
-            })
+                return jsonify({
+                    'success': True,
+                    'message': 'Displaying questions based on the specified category',
+                    'questions': current_questions,
+                    'current_category': category_id
+                })
         except:
             abort(422)
 
