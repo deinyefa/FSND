@@ -139,30 +139,30 @@ def create_app(test_config=None):
   '''
     @app.route('/questions', methods=['POST'])
     def create_question():
-      body = request.get_json()
+        body = request.get_json()
 
-      new_question = body.get('question', None)
-      new_answer = body.get('answer', None)
-      new_difficulty = body.get('difficulty', None)
-      new_category = body.get('category', None)
+        new_question = body.get('question', None)
+        new_answer = body.get('answer', None)
+        new_difficulty = body.get('difficulty', None)
+        new_category = body.get('category', None)
 
-      try:
-          question = Question(question=new_question, answer=new_answer,
-                              difficulty=new_difficulty, category=new_category)
-          question.insert()
+        try:
+            question = Question(question=new_question, answer=new_answer,
+                                difficulty=new_difficulty, category=new_category)
+            question.insert()
 
-          selection = Question.query.order_by(Question.id).all()
-          current_questions = paginate_questions(request, selection)
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
 
-          return jsonify({
-              'success': True,
-              'created': question.id,
-              'questions': current_questions,
-              'total_questions': len(Question.query.all())
-          })
+            return jsonify({
+                'success': True,
+                'created': question.id,
+                'questions': current_questions,
+                'total_questions': len(Question.query.all())
+            })
 
-      except:
-          abort(422)
+        except:
+            abort(422)
 
     '''
   @TODO:
@@ -174,24 +174,24 @@ def create_app(test_config=None):
   only question that include that string within their question.
   Try using the word "title" to start.
   '''
-    @app.route('/questions', methods=['POST'])
-    def find_questions():
-        try:
-            search_term = request.args.get('searchTerm', '')
-            print(search_term)
-            query = Question.query.filter(
-                Question.question.ilike('%' + search_term + '%')).all()
+    # @app.route('/questions', methods=['POST'])
+    # def find_questions():
+    #     try:
+    #         search_term = request.args.get('searchTerm', '')
+    #         print(search_term)
+    #         query = Question.query.filter(
+    #             Question.question.ilike('%' + search_term + '%')).all()
 
-            current_questions = paginate_questions(request, query)
+    #         current_questions = paginate_questions(request, query)
 
-            return jsonify({
-                'success': True,
-                'questions': current_questions,
-                'total_questions': len(current_questions),
-                'current_category': {}
-            })
-        except:
-            abort(422)
+    #         return jsonify({
+    #             'success': True,
+    #             'questions': current_questions,
+    #             'total_questions': len(current_questions),
+    #             'current_category': {}
+    #         })
+    #     except:
+    #         abort(422)
 
     '''
   @TODO:
@@ -201,19 +201,16 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that
   category to be shown.
   '''
-    @app.route('/categories/<int:category_id>/questions')
+    @app.route('/categories/<category_id>/questions')
     def get_questions_for_category(category_id):
         try:
             questions = Question.query.filter(
-                Question.category == category_id).one_or_none()
-            current_questions = None
-
-            print(questions)
+                Question.category == category_id).order_by(Question.id).all()
 
             if questions is None:
                 abort(404)
-            else:
-                current_questions = paginate_questions(request, questions)
+
+            current_questions = paginate_questions(request, questions)
 
             return jsonify({
                 'success': True,
@@ -248,6 +245,14 @@ def create_app(test_config=None):
             "error": 400,
             "message": "request could not be fulfilled due to bad syntax"
         }), 400
+
+    @app.errorhandler(401)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 401,
+            "message": "you are not authorized to make this request"
+        }), 401
 
     @app.errorhandler(404)
     def not_found(error):
