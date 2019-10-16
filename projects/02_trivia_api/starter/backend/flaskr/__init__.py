@@ -136,7 +136,7 @@ def create_app(test_config=None):
   TEST: When you submit a question on the "Add" tab,
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.
-  
+
   @TODO:
   Create a POST endpoint to get questions based on a search term.
   It should return any questions for whom the search term
@@ -225,6 +225,38 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+    @app.route('/quizzes', methods=['POST'])
+    def play_quiz():
+        body = request.get_json()
+
+        previous_questions = body.get('previous_questions', None)
+        quiz_category = body.get('quiz_category', None)
+
+        question_ids = []
+
+        try:
+            print(previous_questions)
+            print(quiz_category)
+
+            if quiz_category['id'] == 0:
+                questions = Question.query.order_by(Question.id).all()
+            else:
+                questions = Question.query.filter(
+                    Question.category == quiz_category['id']).order_by(Question.id).all()
+
+            for question in questions:
+                question_ids.append(question.id)
+
+            rand_question_id = random.choice(question_ids)
+            next_question = Question.query.get(rand_question_id).format()
+
+            return jsonify({
+                'success': True,
+                'message': 'New message',
+                'question': next_question
+            })
+        except:
+            abort(422)
 
     '''
   @TODO: 
