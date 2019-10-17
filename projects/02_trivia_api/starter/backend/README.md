@@ -89,6 +89,321 @@ GET '/categories'
 
 ```
 
+## API Reference
+### Getting Started
+- Base URL: The backend is only hosted locally at `http://127.0.0.1:5000` or `http://localhost:5000`. 
+- Authentication: This application does not require authenticcation or API keys
+
+### Error Handling
+Errors are returned as JSON object in a format that looks like this:
+```
+{
+  "error": 404,
+  "message": "resource not found",
+  "success": false
+}
+```
+The API will return objects like this when requests fail because of errors of type:
+- 400: Bad Request (usually bad syntax)
+- 401: Unauthorizied Request
+- 404: Resource not found
+- 405: Method not allowed
+- 422: Unprocessable request
+- 500: Internal server error
+
+### Endpoints
+#### GET /categories
+- General:
+  - Fetches available categories as a dictionary such that keys are category id and values are the category name
+  - Request arguments: None
+  - Response: all categories, success value, and total number returned
+- Sample: `curl http://localhost:5000/categories`
+  ```
+  {
+    "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "success": true,
+  "total_categories": 6
+  }
+  ```
+
+#### GET /questions
+- General:
+  - Fetches all questions paginated in groups of 10
+  - Request arguments: (optional) `page` - If none is given, the value is defaulted to 1
+  - Response: all categories, current category, list of questions, success value, and total questions
+- Sample: `curl http://localhost:5000/questions?page=2`
+  ```
+  {
+    "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "current_category": [],
+  "questions": [
+    {
+      "answer": "Tom Cruise",
+      "category": "4",
+      "difficulty": 5,
+      "id": 11,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+    {
+      "answer": "Edward Scissorhands",
+      "category": "5",
+      "difficulty": 3,
+      "id": 12,
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    },
+    {
+      "answer": "George Washington Carver",
+      "category": "4",
+      "difficulty": 2,
+      "id": 13,
+      "question": "Who invented Peanut Butter?"
+    },
+    {
+      "answer": "Mona Lisa",
+      "category": "2",
+      "difficulty": 3,
+      "id": 14,
+      "question": "La Giaconda is better known as what?"
+    }
+  ],
+  "success": true,
+  "total_questions": 14
+  }
+  ```
+
+#### GET /categories/<category_id>/questions
+- General:
+  - Get a list of questions by their category
+  - Request arguments: `category_id`
+  - Response: success value, success message, paginated list of questions, current category
+- Sample: 
+  `curl http://localhost:5000/categories/2/questions`
+  ```
+  {
+    "current_category": "2",
+    "message": "Displaying questions based on the specified category",
+    "questions": [
+      {
+        "answer": "George Washington Carver",
+        "category": "2",
+        "difficulty": 4,
+        "id": 2,
+        "question": "Who invented Peanut Butter?"
+      },
+      {
+        "answer": "Jackson Pollock",
+        "category": "2",
+        "difficulty": 2,
+        "id": 6,
+        "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+      },
+      {
+        "answer": "Mona Lisa",
+        "category": "2",
+        "difficulty": 3,
+        "id": 14,
+        "question": "La Giaconda is better known as what?"
+      }
+    ],
+    "success": true
+  }
+  ```
+
+#### POST /questions (post new question)
+- General:
+  - Post a new question record to the database
+  - Request arguments: `question`, `answer`, `category`, `difficulty`
+  - Response: current set of questions, id of the new question, and total questions
+- Sample: 
+  `curl -X post -H "Content-Type: application/json" -d '{"question":" Which dung beetle was worshipped by the ancient Egyptians?", "answer": "Scarab", "difficulty": "4", "category": "4"}' http://localhost:5000/questions`
+  ```
+  {
+    "created": 16,
+    "questions": [
+      {
+        "answer": "Scarab",
+        "category": "4",
+        "difficulty": 4,
+        "id": 1,
+        "question": " Which dung beetle was worshipped by the ancient Egyptians?"
+      },
+      {
+        "answer": "George Washington Carver",
+        "category": "2",
+        "difficulty": 4,
+        "id": 2,
+        "question": "Who invented Peanut Butter?"
+      },
+      {
+        "answer": "Uruguay",
+        "category": "6",
+        "difficulty": 4,
+        "id": 3,
+        "question": "Which country won the first ever soccer World Cup in 1930?"
+      },
+      {
+        "answer": "Alexander Fleming",
+        "category": "1",
+        "difficulty": 3,
+        "id": 4,
+        "question": "Who discovered penicillin?"
+      },
+      {
+        "answer": "The Liver",
+        "category": "4",
+        "difficulty": 1,
+        "id": 5,
+        "question": "What is the heaviest organ in the human body?"
+      },
+      {
+        "answer": "Jackson Pollock",
+        "category": "2",
+        "difficulty": 2,
+        "id": 6,
+        "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+      },
+      {
+        "answer": "Blood",
+        "category": "4",
+        "difficulty": 1,
+        "id": 7,
+        "question": "Hematology is a branch of medicine involving the study of what?"
+      },
+      {
+        "answer": "Brazil",
+        "category": "6",
+        "difficulty": 3,
+        "id": 8,
+        "question": "Which is the only team to play in every soccer World Cup tournament?"
+      },
+      {
+        "answer": "Muhammad Ali",
+        "category": "1",
+        "difficulty": 4,
+        "id": 9,
+        "question": "What boxer's original name is Cassius Clay?"
+      },
+      {
+        "answer": "The Palace of Versailles",
+        "category": "3",
+        "difficulty": 3,
+        "id": 10,
+        "question": "In which royal palace would you find the Hall of Mirrors?"
+      }
+    ],
+    "success": true,
+    "total_questions": 15
+  }
+  ```
+
+#### POST /questions (search for a question)
+- General:
+  - Queries the database in search for a question based on a search term that is a substring of the question
+  - Request arguments: `searchTerm` (search string)
+  - Response: like set of questions, current category, a success value, and total questions
+- Sample: 
+  `curl -X post -H "Content-Type: application/json" -d '{"searchTerm":" Which"}' http://localhost:5000/questions`
+  ```
+  {
+    "current_category": {},
+    "questions": [
+      {
+        "answer": "Scarab",
+        "category": "4",
+        "difficulty": 4,
+        "id": 1,
+        "question": " Which dung beetle was worshipped by the ancient Egyptians?"
+      },
+      {
+        "answer": "Jackson Pollock",
+        "category": "2",
+        "difficulty": 2,
+        "id": 6,
+        "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+      },
+      {
+        "answer": "The Palace of Versailles",
+        "category": "3",
+        "difficulty": 3,
+        "id": 10,
+        "question": "In which royal palace would you find the Hall of Mirrors?"
+      },
+      {
+        "answer": "Uruguay",
+        "category": "6",
+        "difficulty": 4,
+        "id": 3,
+        "question": "Which country won the first ever soccer World Cup in 1930?"
+      },
+      {
+        "answer": "Brazil",
+        "category": "6",
+        "difficulty": 3,
+        "id": 8,
+        "question": "Which is the only team to play in every soccer World Cup tournament?"
+      },
+      {
+        "answer": "Agra",
+        "category": "3",
+        "difficulty": 2,
+        "id": 16,
+        "question": "The Taj Mahal is located in which Indian city?"
+      }
+    ],
+    "success": true,
+    "total_questions": 6
+  }
+  ```
+
+#### POST /quizzes 
+- General:
+  - Selects a random question that has not previously been asked to the user based on a pre-selected category (or selects one from the entire list if the user wants to be asked from all categories)
+  - Request arguments: `previous_questions` (array of question ids), `quiz_category` (object with category type and id )
+  - Response: like set of questions, current category, a success value, and total questions
+- Sample: 
+  `curl -X post -H "Content-Type: application/json" -d '{"previous_questions":[7, 11, 1, 13], "quiz_category": {"type": "History", "id": "4"}}' http://localhost:5000/quizzes`
+  ```
+  {
+    "message": "Successfully showing next question",
+    "question": {
+      "answer": "The Liver",
+      "category": "4",
+      "difficulty": 1,
+      "id": 5,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    "success": true
+  }
+  ```
+
+#### DELETE /questions/<question_id>
+- General:
+  - Deletes a specific question
+  - Request arguments: `question_id` (question id)
+  - Response: success value, id of the deleted question, success message
+- Sample: 
+  `curl -X DELETE http://localhost:5000/questions/3`
+  ```
+  {
+    "id": 3, 
+    "message": "Question was successfully deleted", 
+    "success": true
+  }
+  ```
 
 ## Testing
 To run the tests, run

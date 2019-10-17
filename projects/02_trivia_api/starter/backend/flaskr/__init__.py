@@ -147,7 +147,7 @@ def create_app(test_config=None):
   Try using the word "title" to start.
   '''
     @app.route('/questions', methods=['POST'])
-    def create_question():
+    def create_find_question():
         body = request.get_json()
 
         new_question = body.get('question', None)
@@ -248,10 +248,10 @@ def create_app(test_config=None):
 
             return jsonify({
                 'success': True,
-                'message': 'New message',
+                'message': 'Successfully showing next question',
                 'question': next_question
             })
-            
+
         except Exception as e:
             print(e)
             abort(422)
@@ -285,6 +285,14 @@ def create_app(test_config=None):
             "message": "resource not found"
         }), 404
 
+    @app.errorhandler(405)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 405,
+            "message": "this method is not allowed"
+        }), 405
+
     @app.errorhandler(422)
     def not_found(error):
         return jsonify({
@@ -293,12 +301,12 @@ def create_app(test_config=None):
             "message": "unprocessable"
         }), 422
 
-    @app.errorhandler(405)
+    @app.errorhandler(500)
     def not_found(error):
         return jsonify({
             "success": False,
-            "error": 405,
-            "message": "this method is not allowed"
-        }), 405
+            "error": 500,
+            "message": "an internal server error occurred"
+        }), 500
 
     return app
