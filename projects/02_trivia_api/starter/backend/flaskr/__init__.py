@@ -54,8 +54,6 @@ def create_app(test_config=None):
         for category in categories:
             formatted_categories[category.id] = category.type
 
-        # print(formatted_categories)
-
         if len(categories) == 0:
             abort(404)
 
@@ -158,6 +156,7 @@ def create_app(test_config=None):
 
         try:
             if search_query:
+                # Perform database search 
                 query = Question.query.filter(
                     Question.question.ilike('%' + search_query + '%')).all()
 
@@ -170,6 +169,7 @@ def create_app(test_config=None):
                     'current_category': {}
                 })
             else:
+                # user wants to add a new question; do that
                 question = Question(question=new_question, answer=new_answer,
                                     difficulty=new_difficulty, category=new_category)
                 question.insert()
@@ -235,12 +235,15 @@ def create_app(test_config=None):
         try:
 
             if quiz_category['id'] == 0:
+                # Grab all questions that are NOT in previous_questions array
                 questions = Question.query.filter(
                     ~Question.id.in_(previous_questions)).order_by(Question.id).all()
             else:
+                # Grab only questions in the relevant category that are NOT in previous_questions array
                 questions = Question.query.filter(
                     Question.category == quiz_category['id']).filter(~Question.id.in_(previous_questions)).order_by(Question.id).all()
 
+            # If anything is gotten, pick a random one or else have it be returned as nothing
             if len(questions) > 0:
                 next_question = random.choice(questions).format()
             else:
