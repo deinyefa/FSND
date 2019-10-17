@@ -26,7 +26,8 @@ def create_app(test_config=None):
     setup_db(app)
 
     '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after
+  completing the TODOs
   '''
     CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -72,7 +73,8 @@ def create_app(test_config=None):
 
   TEST: At this point, when you start the application
   you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
+  ten questions per page and pagination at the bottom of the screen for
+  three pages.
   Clicking on the page numbers should update the questions.
   '''
     @app.route('/questions')
@@ -101,7 +103,8 @@ def create_app(test_config=None):
   @TODO:
   Create an endpoint to DELETE question using a question ID.
 
-  TEST: When you click the trash icon next to a question, the question will be removed.
+  TEST: When you click the trash icon next to a question,
+  the question will be removed.
   This removal will persist in the database and when you refresh the page.
   '''
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
@@ -122,7 +125,8 @@ def create_app(test_config=None):
                 'id': question_id,
                 'message': 'Question was successfully deleted'
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     '''
@@ -156,7 +160,7 @@ def create_app(test_config=None):
 
         try:
             if search_query:
-                # Perform database search 
+                # Perform database search
                 query = Question.query.filter(
                     Question.question.ilike('%' + search_query + '%')).all()
 
@@ -170,8 +174,10 @@ def create_app(test_config=None):
                 })
             else:
                 # user wants to add a new question; do that
-                question = Question(question=new_question, answer=new_answer,
-                                    difficulty=new_difficulty, category=new_category)
+                question = Question(question=new_question,
+                                    answer=new_answer,
+                                    difficulty=new_difficulty,
+                                    category=new_category)
                 question.insert()
 
                 selection = Question.query.order_by(Question.id).all()
@@ -183,7 +189,8 @@ def create_app(test_config=None):
                     'questions': current_questions,
                     'total_questions': len(Question.query.all())
                 })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     '''
@@ -207,23 +214,25 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'message': 'Displaying questions based on the specified category',
+                    'message': '''Displaying questions based on
+                                specified category''',
                     'questions': current_questions,
                     'current_category': category_id
                 })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
+  @TODO:
+  Create a POST endpoint to get questions to play the quiz.
+  This endpoint should take category and previous question parameters
+  and return a random questions within the given category,
+  if provided, and that is not one of the previous questions.
 
   TEST: In the "Play" tab, after a user selects "All" or a category,
   one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
+  and shown whether they were correct or not.
   '''
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
@@ -237,13 +246,18 @@ def create_app(test_config=None):
             if quiz_category['id'] == 0:
                 # Grab all questions that are NOT in previous_questions array
                 questions = Question.query.filter(
-                    ~Question.id.in_(previous_questions)).order_by(Question.id).all()
+                    ~Question.id.in_(previous_questions)
+                ).order_by(Question.id).all()
             else:
-                # Grab only questions in the relevant category that are NOT in previous_questions array
+                # Grab only questions in the relevant category that are NOT in
+                # previous_questions array
                 questions = Question.query.filter(
-                    Question.category == quiz_category['id']).filter(~Question.id.in_(previous_questions)).order_by(Question.id).all()
+                    Question.category == quiz_category['id']).filter(
+                        ~Question.id.in_(previous_questions)
+                ).order_by(Question.id).all()
 
-            # If anything is gotten, pick a random one or else have it be returned as nothing
+            # If anything is gotten, pick a random one or
+            # else have it be returned as nothing
             if len(questions) > 0:
                 next_question = random.choice(questions).format()
             else:
@@ -260,9 +274,9 @@ def create_app(test_config=None):
             abort(422)
 
     '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
+  @TODO:
+  Create error handlers for all expected errors
+  including 404 and 422.
   '''
     @app.errorhandler(400)
     def not_found(error):

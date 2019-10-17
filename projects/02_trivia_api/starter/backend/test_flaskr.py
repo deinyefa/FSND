@@ -39,7 +39,8 @@ class TriviaTestCase(unittest.TestCase):
 
     """
     TODO
-    Write at least one test for each test for successful operation and for expected errors.
+    Write at least one test for each test for successful operation and
+    for expected errors.
     """
 
     def get_categories(self):
@@ -120,11 +121,12 @@ class TriviaTestCase(unittest.TestCase):
 
     # Test put endpoint
     def test_put_new_question(self):
-        res = self.client().put('/questions', 
-                                json={'question': 'new test question', 'answer': 'a test answer'}
+        res = self.client().put('/questions',
+                                json={'question': 'new test question',
+                                      'answer': 'a test answer'}
                                 )
         data = json.loads(res.data)
-        
+
         self.assertEqual(res.status_code, 405)
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'])
@@ -132,18 +134,28 @@ class TriviaTestCase(unittest.TestCase):
     # Test game play
     def test_game_play_all_categories(self):
         res = self.client().post('/quizzes',
-                                 json={'previous_questions': [7, 11, 1, 13], 'quiz_category': {'type': 'click', 'id': 0}})
+                                 json={
+                                     'previous_questions': [7, 11, 1, 13],
+                                     'quiz_category': {
+                                         'type': 'click', 'id': 0
+                                     }
+                                 })
         data = json.loads(res.data)
-        
+
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'], True)
         self.assertTrue(data['question'])
 
     def test_game_play_one_category(self):
         res = self.client().post('/quizzes',
-                                 json={'previous_questions': [7, 11, 1, 13], 'quiz_category': {'type': 'History', 'id': '4'}})
+                                 json={
+                                     'previous_questions': [7, 11, 1, 13],
+                                     'quiz_category': {
+                                         'type': 'History', 'id': '4'
+                                     }
+                                 })
         data = json.loads(res.data)
-        
+
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'], True)
         self.assertTrue(data['question'])
