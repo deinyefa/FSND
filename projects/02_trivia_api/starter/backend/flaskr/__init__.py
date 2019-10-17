@@ -229,33 +229,31 @@ def create_app(test_config=None):
     def play_quiz():
         body = request.get_json()
 
-        previous_questions = body.get('previous_questions', None)
-        quiz_category = body.get('quiz_category', None)
-
-        question_ids = []
+        previous_questions = body.get('previous_questions', [])
+        quiz_category = body.get('quiz_category', {})
 
         try:
-            print(previous_questions)
-            print(quiz_category)
 
             if quiz_category['id'] == 0:
-                questions = Question.query.order_by(Question.id).all()
+                questions = Question.query.filter(
+                    ~Question.id.in_(previous_questions)).order_by(Question.id).all()
             else:
                 questions = Question.query.filter(
-                    Question.category == quiz_category['id']).order_by(Question.id).all()
+                    Question.category == quiz_category['id']).filter(~Question.id.in_(previous_questions)).order_by(Question.id).all()
 
-            for question in questions:
-                question_ids.append(question.id)
-
-            rand_question_id = random.choice(question_ids)
-            next_question = Question.query.get(rand_question_id).format()
+            if len(questions) > 0:
+                next_question = random.choice(questions).format()
+            else:
+                next_question = None
 
             return jsonify({
                 'success': True,
                 'message': 'New message',
                 'question': next_question
             })
-        except:
+            
+        except Exception as e:
+            print(e)
             abort(422)
 
     '''
