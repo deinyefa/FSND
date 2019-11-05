@@ -18,7 +18,7 @@ CORS(app)
 '''
 # db_drop_and_create_all()
 
-## ROUTES
+# ROUTES
 '''
 @TODO implement endpoint
     GET /drinks
@@ -73,9 +73,23 @@ CORS(app)
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['DELETE'])
+def delete_drink(id):
+    try:
+        drink = Drink.query.filter(Drink.id == id).one_or_none()
+        
+        if (id is None):
+            abort(404)
+
+        drink.delete()
+
+        return jsonify({
+            "success": True,
+            "delete": id
+        })
 
 
-## Error Handling 
+# Error Handling
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
@@ -87,13 +101,15 @@ CORS(app)
 
 '''
 
+
 @app.errorhandler(400)
-    def bad_syntax(error):
+def bad_syntax(error):
         return jsonify({
             "success": False,
             "error": 400,
             "message": "request could not be fulfilled due to bad syntax"
         }), 400
+
 
 @app.errorhandler(401)
 def unauthorized(error):
@@ -103,6 +119,7 @@ def unauthorized(error):
         "message": "you are not authorized to make this request"
     }), 401
 
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -110,6 +127,7 @@ def not_found(error):
         "error": 404,
         "message": "resource not found"
     }), 404
+
 
 @app.errorhandler(405)
 def not_allowed(error):
@@ -119,6 +137,7 @@ def not_allowed(error):
         "message": "this method is not allowed"
     }), 405
 
+
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
@@ -127,6 +146,7 @@ def unprocessable(error):
         "message": "unprocessable"
     }), 422
 
+
 @app.errorhandler(500)
 def server_error(error):
     return jsonify({
@@ -134,6 +154,7 @@ def server_error(error):
         "error": 500,
         "message": "an internal server error occurred"
     }), 500
+
 
 '''
 @TODO implement error handler for 404
