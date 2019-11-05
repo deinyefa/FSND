@@ -110,7 +110,7 @@ def verify_decode_jwt(token):
     unverified_header = jwt.get_unverified_header(token)
 
     rsa_key = {}
-    if 'kid' nnot in unverified_header:
+    if 'kid' not in unverified_header:
         raise AuthError({
             'code': 'invalid_header',
             'description': 'Malformed authorization'
@@ -129,7 +129,7 @@ def verify_decode_jwt(token):
     if rsa_key:
         try:
             payload = jwt.decode(
-                token, rsa_key, algorithms=ALGORITHMS, audience: API_AUDIENCE, issuer='https://' + AUTH0_DOMAIN + '/'
+                token, rsa_key, algorithms=ALGORITHMS, audience=API_AUDIENCE, issuer='https://' + AUTH0_DOMAIN + '/'
             )
             return payload
 

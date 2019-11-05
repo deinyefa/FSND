@@ -75,18 +75,7 @@ CORS(app)
 '''
 
 
-## Error Handling
-'''
-Example error handling for unprocessable entity
-'''
-@app.errorhandler(422)
-def unprocessable(error):
-    return jsonify({
-                    "success": False, 
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
-
+## Error Handling 
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
@@ -97,6 +86,54 @@ def unprocessable(error):
                     }), 404
 
 '''
+
+@app.errorhandler(400)
+    def bad_syntax(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "request could not be fulfilled due to bad syntax"
+        }), 400
+
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({
+            "success": False,
+            "error": 401,
+            "message": "you are not authorized to make this request"
+        }), 401
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "resource not found"
+        }), 404
+
+    @app.errorhandler(405)
+    def not_allowed(error):
+        return jsonify({
+            "success": False,
+            "error": 405,
+            "message": "this method is not allowed"
+        }), 405
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": "an internal server error occurred"
+        }), 500
 
 '''
 @TODO implement error handler for 404
