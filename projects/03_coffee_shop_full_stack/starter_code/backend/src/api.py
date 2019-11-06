@@ -72,8 +72,9 @@ def get_drinks_detail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
-requires_auth('post:drinks')
+
 @app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
 def post_new_drink():
     body = request.get_json()
     new_title = body.get('title')
