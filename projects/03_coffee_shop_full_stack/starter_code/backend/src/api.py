@@ -27,6 +27,18 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks', methods=['GET'])
+def get_drinks():
+    try:
+        drinks = Drink.query.order_by(Drink.id).all()
+        # print(drinks.short)
+
+        return jsonify({
+            "success": True,
+            # "drinks": drinks
+        })
+    except:
+        abort(422)
 
 
 '''
@@ -37,6 +49,18 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks-detail', methods=['GET'])
+def get_drinks_detail():
+    try:
+        drinks = Drink.query.order_by(Drink.id).all()
+        # print(drinks)
+
+        return jsonify({
+            "success": True,
+            # "drinks": drinks
+        })
+    except:
+        abort(422)
 
 
 '''
@@ -48,6 +72,26 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+requires_auth('post:drinks')
+@app.route('/drinks', methods=['POST'])
+def post_new_drink():
+    body = request.get_json()
+    new_title = body.get('title')
+    new_recipe = body.get('recipe')
+
+    try:
+        new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
+        new_drink.insert()
+
+        drinks = Drink.query.order_by(Drink.id).all()
+
+        return jsonify({
+            "success": True,
+            # "drinks": drinks
+        })
+    except Exception as e:
+        print(e)
+        abort(422)
 
 
 '''
@@ -77,7 +121,7 @@ CORS(app)
 def delete_drink(id):
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
-        
+
         if (id is None):
             abort(404)
 
@@ -87,9 +131,10 @@ def delete_drink(id):
             "success": True,
             "delete": id
         })
+    except:
+        abort(422)
 
 
-# Error Handling
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
@@ -104,11 +149,11 @@ def delete_drink(id):
 
 @app.errorhandler(400)
 def bad_syntax(error):
-        return jsonify({
-            "success": False,
-            "error": 400,
-            "message": "request could not be fulfilled due to bad syntax"
-        }), 400
+    return jsonify({
+        "success": False,
+        "error": 400,
+        "message": "request could not be fulfilled due to bad syntax"
+    }), 400
 
 
 @app.errorhandler(401)
