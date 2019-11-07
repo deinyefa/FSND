@@ -248,3 +248,10 @@ def server_error(error):
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
+@app.errorhandler(AuthError)
+def authentication_error(error):
+    return jsonify({
+        'success': False,
+        'error': AuthError,
+        "message": "An authorization error has been detected"
+    }), AuthError
