@@ -30,12 +30,15 @@ CORS(app)
 @app.route('/drinks', methods=['GET'])
 def get_drinks():
     try:
-        drinks = Drink.query.order_by(Drink.id).all()
-        # print(drinks.short)
+        drinks_list = Drink.query.order_by(Drink.id).all()
+        drinks = []
+
+        for drink in drinks_list:
+            drinks.append(drink.short())
 
         return jsonify({
             "success": True,
-            # "drinks": drinks
+            "drinks": drinks
         })
     except:
         abort(422)
@@ -50,16 +53,21 @@ def get_drinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks-detail', methods=['GET'])
+# @requires_auth('get:drinks-detail')
 def get_drinks_detail():
     try:
-        drinks = Drink.query.order_by(Drink.id).all()
-        # print(drinks)
+        drinks_list = Drink.query.order_by(Drink.id).all()
+        drinks = []
+        
+        for drink in drinks_list:
+            drinks.append(drink.long())
 
         return jsonify({
             "success": True,
-            # "drinks": drinks
+            "drinks": drinks
         })
-    except:
+    except Exception as e:
+        print(e)
         abort(422)
 
 
@@ -74,21 +82,23 @@ def get_drinks_detail():
 '''
 
 @app.route('/drinks', methods=['POST'])
-@requires_auth('post:drinks')
+# @requires_auth('post:drinks')
 def post_new_drink():
     body = request.get_json()
     new_title = body.get('title')
     new_recipe = body.get('recipe')
+    drink = []
 
     try:
         new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
         new_drink.insert()
 
         drinks = Drink.query.order_by(Drink.id).all()
+        drink.append(new_drink.long())
 
         return jsonify({
             "success": True,
-            # "drinks": drinks
+            "drinks": drink
         })
     except Exception as e:
         print(e)
@@ -106,6 +116,31 @@ def post_new_drink():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['PATCH'])
+# @requires_auth('patch:drinks')
+def edit_drinks(id):
+    body = request.get_json()
+    title = body.get('title')
+    recipe = body.get('recipe')
+
+    try:
+        drink = Drink.query.filter(Drink.id == id).one_or_none()
+
+        if drink is None:
+            abort(404)
+
+        drink.title = title
+        drink.recipe = json.dumps(recipe)
+        drink.update()
+
+        return jsonify({
+            'success': True,
+            'drinks': [drink.long()]
+        })
+
+    except Exception as e:
+        print(e)
+        abort(422)
 
 
 '''

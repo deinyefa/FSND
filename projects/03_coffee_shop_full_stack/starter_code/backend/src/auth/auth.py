@@ -6,7 +6,7 @@ from urllib.request import urlopen
 
 
 AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
-ALGORITHMS = ['RS256']
+ALGORITHMS = ['HS256']
 API_AUDIENCE = 'dev'
 
 # AuthError Exception
@@ -37,7 +37,7 @@ class AuthError(Exception):
 def get_token_auth_header():
     auth_header = request.headers.get('Authorization', None)
 
-    if auth is None:
+    if auth_header is None:
         raise AuthError({
             'code': 'missing_authorization_header',
             'message': 'There is no Authothorization header in this request'
@@ -56,7 +56,7 @@ def get_token_auth_header():
             'message': 'Your authorization header should begin with "Bearer"'
         }, 401)
 
-    return header_parts[1]
+    return auth_header_parts[1]
 
 
 '''
@@ -84,7 +84,7 @@ def check_permissions(permission, payload):
             'code': 'not_authorized',
             'description': 'Permission not found'
         }, 403)
-    
+
     return True
 
 
@@ -129,7 +129,8 @@ def verify_decode_jwt(token):
     if rsa_key:
         try:
             payload = jwt.decode(
-                token, rsa_key, algorithms=ALGORITHMS, audience=API_AUDIENCE, issuer='https://' + AUTH0_DOMAIN + '/'
+                token, rsa_key, algorithms=ALGORITHMS, audience=API_AUDIENCE, issuer='https://' +
+                AUTH0_DOMAIN + '/'
             )
             return payload
 
@@ -176,9 +177,12 @@ def requires_auth(permission=''):
             token = get_token_auth_header()
             try:
                 payload = verify_decode_jwt(token)
-                check_permissions(permission, payload)
             except:
-                abort(401)
+                raise AuthError({
+                    'code': 'expired_token',
+                    'description': 'The provided token has expired'
+                }, 401)
+            check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
         return wrapper
