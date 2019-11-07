@@ -154,11 +154,12 @@ def edit_drinks(id):
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<int:id>', methods=['DELETE'])
+# @requires_auth('delete:drinks')
 def delete_drink(id):
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
 
-        if (id is None):
+        if drink is None:
             abort(404)
 
         drink.delete()
