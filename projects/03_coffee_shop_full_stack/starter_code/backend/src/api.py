@@ -32,7 +32,7 @@ def get_drinks():
     try:
         drinks_list = Drink.query.order_by(Drink.id).all()
         drinks = []
-
+        
         for drink in drinks_list:
             drinks.append(drink.short())
 
@@ -40,7 +40,8 @@ def get_drinks():
             "success": True,
             "drinks": drinks
         })
-    except:
+    except Exception as e:
+        print(e)
         abort(422)
 
 
@@ -53,8 +54,8 @@ def get_drinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks-detail', methods=['GET'])
-# @requires_auth('get:drinks-detail')
-def get_drinks_detail():
+@requires_auth('get:drinks-detail')
+def get_drinks_detail(jwt):
     try:
         drinks_list = Drink.query.order_by(Drink.id).all()
         drinks = []
@@ -82,11 +83,11 @@ def get_drinks_detail():
 '''
 
 @app.route('/drinks', methods=['POST'])
-# @requires_auth('post:drinks')
-def post_new_drink():
+@requires_auth('post:drinks')
+def post_new_drink(jwt):
     body = request.get_json()
-    new_title = body.get('title')
-    new_recipe = body.get('recipe')
+    new_title = body.get('title', '')
+    new_recipe = body.get('recipe', [])
     drink = []
 
     try:
@@ -120,8 +121,8 @@ def post_new_drink():
 # @requires_auth('patch:drinks')
 def edit_drinks(id):
     body = request.get_json()
-    title = body.get('title')
-    recipe = body.get('recipe')
+    title = body.get('title', None)
+    recipe = body.get('recipe', None)
 
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
@@ -129,8 +130,11 @@ def edit_drinks(id):
         if drink is None:
             abort(404)
 
-        drink.title = title
-        drink.recipe = json.dumps(recipe)
+        if title: 
+            drink.title = title
+        if recipe: 
+            drink.recipe = json.dumps(recipe)
+        
         drink.update()
 
         return jsonify({
@@ -154,7 +158,7 @@ def edit_drinks(id):
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<int:id>', methods=['DELETE'])
-# @requires_auth('delete:drinks')
+@requires_auth('delete:drinks')
 def delete_drink(id):
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
@@ -250,8 +254,6 @@ def server_error(error):
 '''
 @app.errorhandler(AuthError)
 def authentication_error(error):
-    return jsonify({
-        'success': False,
-        'error': AuthError,
-        "message": "An authorization error has been detected"
-    }), AuthError
+    response = jsonify(error.error)
+    response.status_code = error.status_code
+    return response

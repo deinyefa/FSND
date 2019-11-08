@@ -5,9 +5,9 @@ from jose import jwt
 from urllib.request import urlopen
 
 
-AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
-ALGORITHMS = ['HS256']
-API_AUDIENCE = 'dev'
+AUTH0_DOMAIN = 'dev-deinyefa.auth0.com'
+ALGORITHMS = ['RS256']
+API_AUDIENCE = 'spice-latte'
 
 # AuthError Exception
 '''
@@ -83,7 +83,7 @@ def check_permissions(permission, payload):
         raise AuthError({
             'code': 'not_authorized',
             'description': 'Permission not found'
-        }, 403)
+        }, 401)
 
     return True
 
@@ -104,7 +104,7 @@ def check_permissions(permission, payload):
 
 
 def verify_decode_jwt(token):
-    jsonurl = urlopen(f'https://dev-deinyefa.auth0.com/.well-known/jwks.json')
+    jsonurl = urlopen(f'https://' + AUTH0_DOMAIN + '/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
 
     unverified_header = jwt.get_unverified_header(token)
@@ -183,6 +183,7 @@ def requires_auth(permission=''):
                     'description': 'The provided token has expired'
                 }, 401)
             check_permissions(permission, payload)
+            print(*args)
             return f(payload, *args, **kwargs)
 
         return wrapper
