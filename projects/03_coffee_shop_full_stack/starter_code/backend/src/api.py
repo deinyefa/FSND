@@ -1,11 +1,12 @@
-import os
-from flask import Flask, request, jsonify, abort
-from sqlalchemy import exc
 import json
-from flask_cors import CORS
+import os
 
-from .database.models import db_drop_and_create_all, setup_db, Drink
+from flask import Flask, abort, jsonify, request
+from flask_cors import CORS
+from sqlalchemy import exc
+
 from .auth.auth import AuthError, requires_auth
+from .database.models import Drink, db_drop_and_create_all, setup_db
 
 app = Flask(__name__)
 setup_db(app)
@@ -32,7 +33,7 @@ def get_drinks():
     try:
         drinks_list = Drink.query.order_by(Drink.id).all()
         drinks = []
-        
+
         for drink in drinks_list:
             drinks.append(drink.short())
 
@@ -55,11 +56,11 @@ def get_drinks():
 '''
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
-def get_drinks_detail(jwt):
+def get_drinks_detail(_jwt):
     try:
         drinks_list = Drink.query.order_by(Drink.id).all()
         drinks = []
-        
+
         for drink in drinks_list:
             drinks.append(drink.long())
 
@@ -81,6 +82,7 @@ def get_drinks_detail(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+
 
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
@@ -118,8 +120,8 @@ def post_new_drink(jwt):
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<int:id>', methods=['PATCH'])
-# @requires_auth('patch:drinks')
-def edit_drinks(id):
+@requires_auth('patch:drinks')
+def edit_drinks(_jwt, id):
     body = request.get_json()
     title = body.get('title', None)
     recipe = body.get('recipe', None)
@@ -130,11 +132,11 @@ def edit_drinks(id):
         if drink is None:
             abort(404)
 
-        if title: 
+        if title:
             drink.title = title
-        if recipe: 
+        if recipe:
             drink.recipe = json.dumps(recipe)
-        
+
         drink.update()
 
         return jsonify({
@@ -159,7 +161,7 @@ def edit_drinks(id):
 '''
 @app.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
-def delete_drink(id):
+def delete_drink(_jwt, id):
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
 
