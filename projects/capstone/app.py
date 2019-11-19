@@ -1,6 +1,7 @@
 import os
 from flask import Flask, abort, jsonify, request
 from models import setup_db, Actor, Movie, format_date
+from auth import requires_auth, AuthError
 from flask_cors import CORS
 
 QUESTIONS_PER_PAGE = 10
@@ -31,8 +32,9 @@ def create_app(test_config=None):
         where actors is the list of actors paged by 10
         or appropriate status code indicating reason for failure
     '''
+    @requires_auth('get:actors+movies')
     @app.route('/actors')
-    def get_actors():
+    def get_actors(_jwt):
         try:
             actors = Actor.query.order_by(Actor.id).all()
             current_actors = paginate_response(request, actors)
@@ -158,6 +160,7 @@ def create_app(test_config=None):
         where movies is the list of movies paged by 10
         or appropriate status code indicating reason for failure
     '''
+    @requires_auth('get:actors+movies')
     @app.route('/movies')
     def get_movies():
         try:
@@ -181,6 +184,7 @@ def create_app(test_config=None):
         or appropriate error code
     '''
     @app.route('/movies', methods=['POST'])
+    @requires_auth('post+delete:movies')
     def create_movies():
         body = request.get_json()
         movie_title = body.get('title', None)
@@ -278,6 +282,60 @@ def create_app(test_config=None):
     @app.route('/coolkids')
     def be_cool():
         return "Be cool, man, be coooool! You're almost a FSND grad!"
+
+    @app.errorhandler(AuthError)
+    def authentication_error(error):
+        response = jsonify(error.error)
+        response.status_code = error.status_code
+        return response
+
+    @app.errorhandler(400)
+    def bad_syntax(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "request could not be fulfilled due to bad syntax"
+        }), 400
+
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return jsonify({
+            "success": False,
+            "error": 401,
+            "message": "you are not authorized to make this request"
+        }), 401
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "resource not found"
+        }), 404
+
+    @app.errorhandler(405)
+    def not_allowed(error):
+        return jsonify({
+            "success": False,
+            "error": 405,
+            "message": "this method is not allowed"
+        }), 405
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": "an internal server error occurred"
+        }), 500
 
     return app
 
