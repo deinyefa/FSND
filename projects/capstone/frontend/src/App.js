@@ -1,11 +1,12 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Router, Route, Switch } from "react-router-dom";
+import { Router, Route, Switch, Link } from "react-router-dom";
 
 import NavBar from "./components/NavBar";
 import { useAuth0 } from "./react-auth0-spa";
 import { Movies } from './components/Movies';
+import { Actors } from './components/Actors';
 import history from "./utils/history";
 
 function App() {
@@ -19,13 +20,16 @@ function App() {
     <div className="App">
       <Router history={history}>
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+          <Link to='/'>
+            <img src={logo} className="App-logo" alt="logo" />
+          </Link>
           <NavBar />
         </header>
 
         <Switch>
           <Route path='/' exact />
           <Route path='/movies' component={Movies} />
+          <Route path='/actors' component={Actors} />
         </Switch>
       </Router>
     </div>

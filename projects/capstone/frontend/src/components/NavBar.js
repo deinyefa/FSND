@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth0 } from '../react-auth0-spa';
+import {Button} from 'reactstrap'
 
 const NavBar = () => {
     const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
@@ -7,10 +8,10 @@ const NavBar = () => {
     return (
         <>
           {!isAuthenticated && (
-            <button onClick={() => window.location.replace(loginWithRedirect())}>Log in</button>
+            <Button onClick={() => window.location.replace(loginWithRedirect())}>Log in</Button>
           )}
     
-          {isAuthenticated && <button onClick={() => logout()}>Log out</button>}
+          {isAuthenticated && <Button onClick={() => logout()}>Log out</Button>}
         </>
       );
 }
