@@ -1,6 +1,6 @@
 import os
 from flask import Flask, abort, jsonify, request
-from models import setup_db, Actor, Movie
+from models import setup_db, Actor, Movie, format_date
 from flask_cors import CORS
 
 QUESTIONS_PER_PAGE = 10
@@ -21,6 +21,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
     CORS(app)
+    app.jinja_env.filters['date'] = format_date
 
     '''
     implement endpoint
@@ -144,6 +145,123 @@ def create_app(test_config=None):
                 'actors': paginate_response(request, actors),
                 'deleted_actor': actor.format(),
                 'success': True
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    '''
+    implement endpoint
+        GET /movies
+            it should be a public route
+        returns status code 200 and json {"success": True, "movies": movies}
+        where movies is the list of movies paged by 10
+        or appropriate status code indicating reason for failure
+    '''
+    @app.route('/movies')
+    def get_movies():
+        try:
+            movies = Movie.query.order_by(Movie.id).all()
+
+            return jsonify({
+                "movies": paginate_response(request, movies),
+                "total_movies": len(Movie.query.all()),
+                "success": True
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    '''
+    implement endpoint
+        POST /movies
+            it should be a private route
+        returns status code 200 {"success":True, "movies":movies}
+        where movies is a list of all movies pages in 10s
+        or appropriate error code
+    '''
+    @app.route('/movies', methods=['POST'])
+    def create_movies():
+        body = request.get_json()
+        movie_title = body.get('title', None)
+        movie_release_date = body.get('release_date', None)
+
+        try:
+            movie = Movie(
+                title=movie_title,
+                release_date=movie_release_date
+            )
+            movie.insert()
+            movies = Movie.query.order_by(Movie.id).all()
+
+            return jsonify({
+                "movies": paginate_response(request, movies),
+                "total_movies": len(movies),
+                "success": True
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+            movie.rollback()
+
+    '''
+    implement endpoint
+        PATCH /movies/movie_id
+            it should be a private route
+        return status code 200 {"success":True, "movie",movie}
+        where movie is the updated movie
+        or an appropriate error code
+    '''
+    @app.route('/movies/<int:movie_id>', methods=['PATCH'])
+    def edit_movie(movie_id):
+        body = request.get_json()
+        movie_title = body.get('title', None)
+        movie_release_date = body.get('release_date', None)
+
+        movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
+        try:
+
+            if movie is None:
+                abort(404)
+
+            if movie_title:
+                movie.title = movie_title
+            if movie_release_date:
+                movie.release_date = movie_release_date
+
+            movie.update()
+
+            return jsonify({
+                "movie": movie.format(),
+                "success": True
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    '''
+    implement endpoint
+        DELETE /movies/movie_id
+            it should be a private route
+        return status code 200 {"success":True, "movies":movies}
+        where movies is the remaining movies after deletion pages 10
+        or an appropriate error code
+    '''
+    @app.route('/movies/<int:movie_id>', methods=["DELETE"])
+    def remove_movie(movie_id):
+        try:
+            movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
+
+            if movie is None:
+                abort(404)
+
+            movie.delete()
+            movies = Movie.query.order_by(Movie.id).all()
+
+            return jsonify({
+                "movies": paginate_response(request, movies),
+                "deleted_movie": movie.format(),
+                "success": True
             })
         except Exception as e:
             print(e)

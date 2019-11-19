@@ -2,6 +2,8 @@ import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
+import dateutil.parser
+import babel
 
 # database_path = os.environ['DATABASE_URL']
 
@@ -93,9 +95,21 @@ class Movie(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def rollback(self):
+        db.session.rollback()
+
     def format(self):
         return {
             'id': self.id,
             'title': self.title,
             'release_date': self.release_date
         }
+
+
+def format_date(value, format='medium'):
+    date = dateutil.parser.parse(value)
+    if format == 'full':
+        format = 'EEEE MMMM, d, y'
+    elif format == 'medium':
+        format = 'EE MM, dd, y'
+    return babel.dates.format_date(date, format)
