@@ -32,8 +32,8 @@ def create_app(test_config=None):
         where actors is the list of actors paged by 10
         or appropriate status code indicating reason for failure
     '''
-    @requires_auth('get:actors+movies')
     @app.route('/actors')
+    @requires_auth('get:actors+movies')
     def get_actors(_jwt):
         try:
             actors = Actor.query.order_by(Actor.id).all()
@@ -57,7 +57,8 @@ def create_app(test_config=None):
         or appropriate status code indicating reason for failure
     '''
     @app.route('/actors', methods=['POST'])
-    def create_actor():
+    @requires_auth('post+delete:actors')
+    def create_actor(_jwt):
         body = request.get_json()
 
         actor_name = body.get('name', None)
@@ -94,7 +95,8 @@ def create_app(test_config=None):
         or appropriate status code indicating reason for failure
     '''
     @app.route('/actors/<int:actor_id>', methods=['PATCH'])
-    def update_actor(actor_id):
+    @requires_auth('patch:actors+movies')
+    def update_actor(_jwt, actor_id):
         body = request.get_json()
 
         actor_name = body.get('name', None)
@@ -133,7 +135,8 @@ def create_app(test_config=None):
         or appropriate status code indicating reason for failure
     '''
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
-    def delete_actor(actor_id):
+    @requires_auth('post+delete:actors')
+    def delete_actor(_jwt, actor_id):
         try:
             actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
@@ -160,9 +163,9 @@ def create_app(test_config=None):
         where movies is the list of movies paged by 10
         or appropriate status code indicating reason for failure
     '''
-    @requires_auth('get:actors+movies')
     @app.route('/movies')
-    def get_movies():
+    @requires_auth('get:actors+movies')
+    def get_movies(_jwt):
         try:
             movies = Movie.query.order_by(Movie.id).all()
 
@@ -217,7 +220,8 @@ def create_app(test_config=None):
         or an appropriate error code
     '''
     @app.route('/movies/<int:movie_id>', methods=['PATCH'])
-    def edit_movie(movie_id):
+    @requires_auth('patch:actors+movies')
+    def edit_movie(_jwt, movie_id):
         body = request.get_json()
         movie_title = body.get('title', None)
         movie_release_date = body.get('release_date', None)
@@ -252,7 +256,8 @@ def create_app(test_config=None):
         or an appropriate error code
     '''
     @app.route('/movies/<int:movie_id>', methods=["DELETE"])
-    def remove_movie(movie_id):
+    @requires_auth('post+delete:movies')
+    def remove_movie(_jwt, movie_id):
         try:
             movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
